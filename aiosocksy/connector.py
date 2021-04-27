@@ -15,12 +15,30 @@ from . import create_connection
 __all__ = ('ProxyConnector', 'ProxyClientRequest')
 
 
-from distutils.version import StrictVersion
+def compare_version(s1: str, s2: str) -> int:
+    i, j = 0, 0
+    while i < len(s1) or j < len(s2):
+        k1 = i
+        while k1 < len(s1) and s1[k1] != '.':
+            k1 += 1
+        k2 = j
+        while k2 < len(s2) and s2[k2] != '.':
+            k2 += 1
 
-if StrictVersion(aiohttp.__version__) < StrictVersion('3.0'):
-    raise RuntimeError(
-        'aiosocksy.connector depends on aiohttp 3.0+'
-    )  # pragma: no cover
+        a = int(s1[i:k1]) if i != k1 else 0
+        b = int(s2[j:k2]) if j != k2 else 0
+        if a > b:
+            return 1
+        if a < b:
+            return -1
+
+        i = k1 + 1
+        j = k2 + 1
+    return 0
+
+
+if compare_version(aiohttp.__version__, '3.0') < 0:
+    raise RuntimeError('aiosocksy.connector depends on aiohttp 3.0+')
 
 
 class ProxyClientRequest(aiohttp.ClientRequest):
